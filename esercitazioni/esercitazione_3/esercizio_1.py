@@ -12,7 +12,7 @@ def smooth(x):
     y = ndi.correlate(x, h, mode='reflect')
     return y
 
-path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\immagini\\Immagini\\'
+path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\Immagini\\'
 
 if __name__ == '__main__':
     im = path + 'lena.jpg'

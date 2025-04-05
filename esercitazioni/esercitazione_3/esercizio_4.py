@@ -7,7 +7,7 @@ sys.path.insert(1,'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio')
 from my_modules.histogramop import fshs
 from my_modules.my_lib import *
 
-path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\immagini\\Immagini\\'
+path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\Immagini\\'
 
 def add_noise(x,d):
     M,N = x.shape

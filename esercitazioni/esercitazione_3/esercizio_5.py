@@ -8,7 +8,7 @@ import skimage.util as ut
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndi
 
-path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\immagini\\Immagini\\'
+path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\Immagini\\'
 
 def add_noise(x):
     return ut.random_noise(x, mode = 's&p')
