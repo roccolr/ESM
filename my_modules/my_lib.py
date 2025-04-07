@@ -1,8 +1,10 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import scipy.ndimage as ndi 
+from skimage.transform import warp 
 import skimage.io as io 
 import random
+
 
 def readjpg(nomefile:str):
     """
@@ -94,3 +96,37 @@ def local_enhance(x:np.array, k1:float, k2:float, k3:float, gain:float) -> tuple
     m = (l_mean <= k1 * g_mean) & (l_dev <= k2 * g_std) & (l_dev >= k3*g_std)
     y = gain*m*x + (1-m)*x
     return y,m
+
+
+def rotate(x, theta):
+    M,N = np.shape(x)
+    # if M % 2 == 0 and N % 2 == 0:
+    # sposto al centro
+    Tt1 = np.array([[1,0,0],[0,1,0],[-M/2,-N/2,1]],dtype=np.float32)
+
+    # rotazione
+    Tr = np.array([[np.cos(theta),np.sin(theta),0],[-np.sin(theta),np.cos(theta),0],[0,0,1]], dtype=np.float32)
+
+    #torno alla pos iniziale
+    Tt2 = np.array([[1,0,0],[0,1,0],[M/2,N/2,1]],dtype=np.float32)
+
+    M = np.dot((np.dot(Tt1, Tr)), Tt2)
+    A = M[[1,0,2],:][:,[1,0,2]].T
+
+    y = warp(x, A, order=1, cval=0)
+    return y
+    # elif M % 2 != 0 or N % 2 != 0:
+    #     # sposto al centro
+    #     Tt1 = np.array([[1,0,0],[0,1,0],[-M/2,-N/2,1]],dtype=np.float32)
+
+    #     # rotazione
+    #     Tr = np.array([[np.cos(theta),np.sin(theta),0],[-np.sin(theta),np.cos(theta),0],[0,0,1]], dtype=np.float32)
+
+    #     #torno alla pos iniziale
+    #     Tt2 = np.array([[1,0,0],[0,1,0],[M/2-1,N/2,1]],dtype=np.float32)
+
+    #     M = np.dot((np.dot(Tt1, Tr)), Tt2)
+    #     A = M[[1,0,2],:][:,[1,0,2]].T
+
+    #     y = warp(x, A, order=1, cval=0)
+    return y

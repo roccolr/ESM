@@ -39,6 +39,7 @@ if __name__ == '__main__':
     m = np.float32(io.imread(mask))
 
     y= enhanc(x, m, 100)
+    z = enhanc()
 
     plt.close('all')
     plt.figure(1)
