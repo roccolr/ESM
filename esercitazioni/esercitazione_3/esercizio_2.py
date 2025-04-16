@@ -40,4 +40,7 @@ if __name__ == '__main__':
 
     plt.figure(3)
     plt.imshow(y, clim=[0,255], cmap='gray')
+
+    plt.figure(4)
+    plt.imshow(mask, clim=[0,1], cmap='gray')
     plt.show()

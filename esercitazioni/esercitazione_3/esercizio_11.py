@@ -16,6 +16,7 @@ m1 = np.array([[0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0],
               [0,0,0,0,0,0,0]
               ])
+
 m2 = np.array([[0,0,0,1,0,0,0],
               [0,0,0,1,0,0,0],
               [0,0,0,1,0,0,0],
@@ -43,13 +44,14 @@ m4 = np.array([[0,0,0,0,0,0,1],
               [1,0,0,0,0,0,0]
               ])
 
+
+
 def my_filter(x):
     x = x.reshape((7,7))
-    data1 = np.mean(x*m1) - np.mean(x*(1-m1))
-    data2 = np.mean(x*m2) - np.mean(x*(1-m2))
-    data3 = np.mean(x*m3) - np.mean(x*(1-m3))
-    data4 = np.mean(x*m4) - np.mean(x*(1-m4))
-
+    data1 = np.mean(x[m1==1]) - np.mean(x[m1==0])
+    data2 = np.mean(x*m2)/np.mean(m2) - np.mean(x*(1-m2))/np.mean(1-m2)
+    data3 = np.mean(x*m3)/np.mean(m3) - np.mean(x*(1-m3))/np.mean(1-m3)
+    data4 = np.mean(x[m4==1]) - np.mean(x[m4==0])
     stacked = np.stack((data1,data2,data3,data4), axis=-1)
     return np.min(stacked, axis=-1)
 
