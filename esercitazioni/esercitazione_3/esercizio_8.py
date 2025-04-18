@@ -8,89 +8,52 @@ sys.path.append('C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio')
 from my_modules.my_lib import rotate
 path = 'C:\\Users\\rocco\\Documents\\università\\ESM\\laboratorio\\Immagini\\'
 
-m1 = np.array([[0,0,0,0,0,0,0,1,1],
-                [0,0,0,0,0,0,1,1,1],
-                [0,0,0,0,0,1,1,1,0],
-                [0,0,0,0,1,1,1,0,0],
-                [0,0,0,1,1,1,0,0,0],
-                [0,0,1,1,1,0,0,0,0],
-                [0,1,1,1,0,0,0,0,0],
-                [1,1,1,0,0,0,0,0,0],
-                [1,1,0,0,0,0,0,0,0],
-                ],dtype=np.float32)
-
-m2 = np.array([[0,0,0,0,0,0,0,0,0],
-                [0,0,0,0,0,0,0,0,0],
-                [0,0,0,0,0,0,0,0,0],
-                [1,1,1,1,1,1,1,1,1],
-                [1,1,1,1,1,1,1,1,1],
-                [1,1,1,1,1,1,1,1,1],
-                [0,0,0,0,0,0,0,0,0],
-                [0,0,0,0,0,0,0,0,0],
-                [0,0,0,0,0,0,0,0,0],
-                ],dtype=np.float32)
-
-m3 = rotate(m1, np.pi/2)
-
-m4 = rotate(m2, np.pi/2)
-
-masks = [m1,m2,m3,m4]
-
-def generate_noise(x):
-    r = 25*np.random.randn(x.shape[0], x.shape[1])
+def generate_noise(x, dev):
+    r = dev*np.random.randn(x.shape[0], x.shape[1])
     return r
 
-def my_mean(x):
-    sum = 0
-    denom = -1
-    for elem in x:
-        sum+=elem
-        if(elem != 0):
-            denom+=1
-    return float(sum/denom)
+def generate_masks(n:int,s:int):
+    """
+    Ritorna 4 maschere booleane di dimensione n
+    """
 
-def my_var(x):
-    x = x.reshape(81)
-    sum = 0
-    denom = 0
-    avg = my_mean(x)
-    for elem in x:
-        if elem != 0:
-            sum += (elem - avg)**2
-            denom += 1
-    return np.float32(sum/denom)
+    mask_3 = np.triu(np.ones((n,n)), -s) - np.triu(np.ones((n,n)), s+1)
+    mask_1 = mask_3[:,::-1]
+    mask_2 = np.zeros((n,n))
+    mask_2[n//2-s : n//2+s+1]=1
+    mask_4 = mask_2.T
+    masks = np.stack((mask_1, mask_2, mask_3, mask_4), 0)
+    return masks>0
 
+def custom_fun(x, masks):
+    K, M, N = masks.shape
+    block = x.reshape([M,N]) # da vettore a matrice
 
+    varianze = np.zeros(K)
+    for k in range(K):
+        varianze[k] = np.var(block[masks[k]])
+    
+    idx = np.argmin(varianze)
 
-def local_var(x):
-    if x.size != 81:
-        print('valore incompatibile')
-        return 0  # oppure np.mean(x), oppure qualche valore di default
-    x = x.reshape((9, 9))
-    data = []
-    for m in masks:
-        var = my_var(x * m)
-        data.append((np.var(x), m))
-    mask = min(data, key=lambda t: t[0])[1]
-    return my_mean((x*mask).reshape(81))
-    # data = []
-    # x = x.reshape((9, 9))
-    # try:
-    #     for m in masks:
-    #         data.append((np.var(x*m),m))
-    # except ValueError as e:
-    #     print(e)
-    # mask = min(data, key= lambda t: t[0])[1]
-    # print(np.mean(x*mask)) 
+    # filtraggio
+    value = np.mean(block[masks[idx]])
+    return value
+
 
 if __name__ == '__main__':
+
+    # lettura immagini
     im = path + 'zebre.y'
     x = np.float32(np.fromfile(im, dtype=np.uint8))
     x = np.reshape(x, (321,481))
-    noise = generate_noise(x)
+
+    #generazione rumore
+    noise = generate_noise(x,25)
     noisy_x = x+noise
 
-    y = ndi.generic_filter(noisy_x, local_var, (9,9), mode='constant')
+    #filtraggio
+    masks = generate_masks(9, 1)
+    y = ndi.generic_filter(noisy_x, custom_fun, (9,9), mode='reflect', extra_keywords={"masks":masks})
 
 
     # stampa section
