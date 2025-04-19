@@ -10,14 +10,14 @@ if __name__ == '__main__':
     x = np.float32(io.imread(im, plugin='pil'))
 
     X = np.fft.fft2(x)
-    A_X = np.log(1+np.abs(np.fft.fftshift(X)))
-    F_X = np.log(1+np.angle(np.fft.fftshift(X)))
+    A_X = np.log(1+np.abs(np.fft.fftshift(X)))      # ampiezza
+    F_X = np.log(1+np.angle(np.fft.fftshift(X)))    # fase
 
-    X1 = np.abs(X)
-    X2= np.exp(1j*np.angle(X))
+    X1 = np.abs(X)                  # prendiamo la sola componente relativa al modulo
+    X2 = np.exp(1j*np.angle(X))     # prendiamo la sola componente relativa alla fase
 
-    y1 = np.real(np.fft.ifft2(np.fft.ifftshift(X1))) # solo parte reale per eventuali errori
-    y2 = np.real(np.fft.ifft2(np.fft.ifftshift(X2)))
+    y1 = np.real(np.fft.ifft2(X1)) # solo parte reale per eventuali errori di calcolo
+    y2 = np.real(np.fft.ifft2(X2))    
 
     plt.close('all')
     plt.figure(1)
@@ -35,8 +35,11 @@ if __name__ == '__main__':
     plt.figure(4)
     plt.subplot(1,2,1)
     plt.imshow((y1-np.min(y1))**0.1, clim=None, cmap='gray')
+    plt.title('ricostruzione modulo')
     plt.subplot(1,2,2)
     plt.imshow(y2, clim=None, cmap='gray')
+    plt.title('ricostruzione fase')
     plt.figure(5)
-    plt.imshow(np.real(np.fft.ifft2(np.fft.ifftshift(X))), clim=[0,255], cmap='gray')
+    plt.imshow(np.real(np.fft.ifft2(X)), clim=[0,255], cmap='gray')
+    plt.title('ricostruzione completa')
     plt.show()
