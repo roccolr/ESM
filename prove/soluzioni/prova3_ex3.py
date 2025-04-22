@@ -12,8 +12,8 @@ import scipy.ndimage as ndi
 from skimage.color import rgb2gray
 plt.close('all')
 
-x1 = rgb2gray(np.float64(io.imread('I1.png'))/255)
-x2 = rgb2gray(np.float64(io.imread('I2.png'))/255)
+x1 = rgb2gray(np.float64(io.imread('C:/Users/Flexo Rodriguez/Desktop/ESM/ESM/prove/immagini/I1.png'))/255)
+x2 = rgb2gray(np.float64(io.imread('C:/Users/Flexo Rodriguez/Desktop/ESM/ESM/prove/immagini/I2.png'))/255)
 
 plt.figure()
 plt.imshow(x1, clim=[0,1], cmap='gray')
@@ -41,7 +41,7 @@ h1, b1 = np.histogram(z1,np.arange(257))
 h2, b2 = np.histogram(z2,np.arange(257))
 s1 = np.std(h1)
 s2 = np.std(h2)
-
+print(s1,s2)
 if s1>495:
     print('I1 è vera')
 else:

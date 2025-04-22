@@ -12,8 +12,8 @@ import scipy.ndimage as ndi
 from skimage.color import rgb2gray
 plt.close('all')
 
-x1 = rgb2gray(np.float64(io.imread('disk1.jpg'))/255)
-x2 = rgb2gray(np.float64(io.imread('disk2.jpg'))/255)
+x1 = rgb2gray(np.float64(io.imread('C:/Users/Flexo Rodriguez/Desktop/ESM/ESM/prove/immagini/disk1.jpg'))/255)
+x2 = rgb2gray(np.float64(io.imread('C:/Users/Flexo Rodriguez/Desktop/ESM/ESM/prove/immagini/disk2.jpg'))/255)
 
 #punto 1
 h  = np.array([[0,1,0],[1,-4,1],[0,1,0]])
