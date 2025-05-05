@@ -42,9 +42,6 @@ x = np.float64(io.imread('barbara.png'))
 
 y1 = filtra(x,h)
 
-
-
-
 #punto 3: filtraggio in frequenza
 def filtrafreq(x,h):
     M,N = x.shape
