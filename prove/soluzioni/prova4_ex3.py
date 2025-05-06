@@ -11,9 +11,9 @@ import skimage.io as io
 import scipy.ndimage as ndi
 plt.close('all')
 
-x1 = np.float64(io.imread('img1.png'))
-x2 = np.float64(io.imread('img2.png'))
-
+path = 'C:/Users/Flexo Rodriguez/Desktop/ESM/ESM/prove/immagini/'
+x1 = np.float64(io.imread(path+'img1.png'))
+x2 = np.float64(io.imread(path+'img2.png'))
 
 m1 = ndi.gaussian_filter(x1, (10,10))<15
 m2 = ndi.gaussian_filter(x2, (10,10))<15
