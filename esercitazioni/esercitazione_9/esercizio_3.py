@@ -1,0 +1,117 @@
+# Configuration
+# !pip install --upgrade git+http://github.com/davin11/easy-cv-dataset keras-cv
+# !wget -q -c https://www.grip.unina.it/download/guide_TF/TrafficSigns.zip
+# !unzip -q -n TrafficSigns.zip
+
+import matplotlib.pyplot as plt
+import numpy as np
+import skimage.io as io
+from skimage.transform import resize
+from sklearn.model_selection import train_test_split
+import scipy.ndimage as ndi
+import easy_cv_dataset as ds
+import tensorflow.keras as keras
+from keras_cv.layers import Resizing, RandomBrightness, RandomZoom, Augmenter
+
+# InceptionV3
+
+img0 = io.imread('TrafficSigns/train/mandatory/img0065_00.png')
+img1 = io.imread('TrafficSigns/train/prohibition/img2929_00.png')
+img2 = io.imread('TrafficSigns/train/warning/img2470_00.png')
+plt.figure(figsize=(15,5)) # altezza e larghezza in inches
+plt.subplot(1,3,1); plt.imshow(img0); plt.title('mandatory')
+plt.subplot(1,3,2); plt.imshow(img1); plt.title('prohibition')
+plt.subplot(1,3,3); plt.imshow(img2); plt.title('warning')
+plt.show()
+
+# Augmentation
+augmenter = Augmenter(layers=[
+                            RandomBrightness(factor=(-0.1, 0.1), value_range=(0, 255)),
+                            RandomZoom((-0.2,0.2)),
+                            ])
+
+train_table=ds.image_dataframe_from_directory('TrafficSigns/train')
+display(train_table) # si accede alla struttura dati con train_table.loc['chiave'] come un dizionario
+train_table,valid_table=train_test_split(train_table,test_size=0.2,
+                                          random_state=34,
+                                          stratify=train_table['class'])
+
+batch_size = 8
+img_height, img_width = 299, 299
+train_dataset=ds.image_classification_dataset_from_dataframe(train_table,
+                                                            batch_size=batch_size, shuffle=True,
+                                                            pre_batching_processing=Resizing(img_height,img_width),
+                                                            post_batching_processing=augmenter,
+                                                            do_normalization=True,
+                                                            class_mode='categorical') #categorical -> OneHot
+                                                            # augmenter per la augmentation dei dati, None per niente
+
+valid_dataset = ds.image_classification_dataset_from_dataframe(valid_table, batch_size=batch_size, shuffle=False,
+                                                                pre_batching_processing=Resizing(img_height, img_width),
+                                                                do_normalization=True,
+                                                                class_mode='categorical')
+
+# fine tuning
+
+base_model = keras.applications.EfficientNetB4(weights='imagenet', include_top=False, input_shape=(img_height, img_width, 3))
+model = keras.models.Sequential()
+model.add(base_model)
+model.add(keras.layers.GlobalAveragePooling2D())
+model.add(keras.layers.Dense(3, activation='softmax'))
+model.summary()
+
+# blocco dei primi 200 strati
+train_after_layer = 200
+for layer in base_model.layers[:train_after_layer]:
+  layer.trainable = False
+
+# Training
+model.compile(loss='categorical_crossentropy',
+              optimizer=keras.optimizers.SGD(learning_rate=1e-4, momentum=0.9),
+              metrics=['accuracy', ])
+
+# possiamo usare un learning rate molto basso perchè non partiamo da pesi random, quindi non c'è il rischio del vanishing gradient
+
+# Model checkpoint
+checkpoint_filepath = '/tmp/ckpt/checkpoint.model.keras'
+model_checkpoint_callback = keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_filepath,
+    monitor='val_accuracy',
+    mode='max',
+    save_best_only=True,
+    save_freq='epoch')
+
+# train
+model.fit(train_dataset, epochs=20, validation_data=valid_dataset, verbose=True, callbacks=[model_checkpoint_callback])
+
+
+# Analisi delle prestazioni
+test_table = ds.image_dataframe_from_directory('TrafficSigns/test')
+test_dataset = ds.image_classification_dataset_from_dataframe(test_table, batch_size=batch_size, shuffle=False,
+                                                                pre_batching_processing=Resizing(img_height, img_width),
+                                                                do_normalization=True,
+                                                                class_mode='categorical')
+test_loss, test_accuracy = model.evaluate(test_dataset, verbose=True)
+print('Test loss:', test_loss)
+print('Test accuracy:',test_accuracy)
+
+# Prova con qualche immagine
+
+ID = np.random.randint(len(test_table))
+filename = test_table.loc[ID, 'image']
+cls = test_table.loc[ID, 'class']
+
+img = np.float32(io.imread(filename))/255
+img = resize(img, (img_height, img_width))
+x = np.reshape(img, (1, img_height, img_width, 3)) # 1 -> solo un'immagine da calcolare
+
+pred = model.predict(x)[0,:]
+
+plt.figure()
+plt.subplot(1,2,1)
+plt.imshow(img)
+plt.title(cls)
+plt.subplot(1,2,2)
+plt.bar(np.arange(3), pred)
+plt.xticks(np.arange(3), ['mandatory', 'prohibition', 'warning'])
+plt.show()
