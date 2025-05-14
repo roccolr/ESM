@@ -7,5 +7,5 @@ Repository di utilità per l'esame di Elaborazione dei segnali multimediali. Gli
 Per utilizzare al meglio gli script su vscode, creare un interprete python virtuale, ed eseguire: 
 
 ```bash
-  pip3 install requirements.txt
+  pip3 install -r requirements.txt
 ```
