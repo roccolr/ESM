@@ -9,3 +9,8 @@ Per utilizzare al meglio gli script su vscode, creare un interprete python virtu
 ```bash
   pip3 install -r requirements.txt
 ```
+
+# Link utili
+
+[Generative Modeling by Estimating Gradients of the Data Distribution - Yang Song](https://yang-song.net/blog/2021/score/)
+
