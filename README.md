@@ -13,4 +13,5 @@ Per utilizzare al meglio gli script su vscode, creare un interprete python virtu
 # Link utili
 
 [Generative Modeling by Estimating Gradients of the Data Distribution - Yang Song](https://yang-song.net/blog/2021/score/)
+
 [Coding Stable Diffusion from scratch](https://www.youtube.com/watch?v=ZBKpAp_6TGI&t=1s&ab_channel=UmarJamil)
